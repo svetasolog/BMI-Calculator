@@ -15,52 +15,54 @@ def calc_bmi(h,w):
         result = 'Obese'
     return bmi, result
 def save_data():
-    name = nameentry.get()
-    age = ageentry.get()
-    height = heightentry.get()
-    weight = weightentry.get()
-    if name == "" or age == "" or height == "" or weight == "":
-        tkinter.messagebox.showwarning(title="Error. Missing data.", message="All fields are required.")
-    elif not age.isnumeric() or not height.isnumeric() or not weight.isnumeric():
-        tkinter.messagebox.showwarning(title="Error. Invalid data.", message="Age, height and weight must be a number.")
-    elif int(age)<0 or int(age)>110:
-        tkinter.messagebox.showwarning(title="Error. Incorrect data.", message="Age must be from 1 to 110.")
-    elif int(height)<50 or int(height)>300:
-        tkinter.messagebox.showwarning(title="Error. Incorrect data.",message="Height must be from 50 to 300cm.")
-    elif int(weight)<2 or int(weight)>600:
-        tkinter.messagebox.showwarning(title="Error. Incorrect data.", message="Weight must be from 2 to 600kg.")
-    else:
-        bmi = calc_bmi(int(height)/100, int(weight))
-        with open('bmis.txt', 'a') as fwrite:
-            fwrite.write(f"{name} {age} {height} {weight} {bmi[0]} {bmi[1]}\n")
-        bmi_var.set(bmi[0])
-        result_var.set(bmi[1])
+    try:
+        name = nameentry.get()
+        age = ageentry.get()
+        height = heightentry.get()
+        weight = weightentry.get()
+        if name == "" or age == "" or height == "" or weight == "":
+            tkinter.messagebox.showwarning("Error. Missing data.", "All fields are required.")
+        elif not age.isnumeric() or not height.isnumeric() or not weight.isnumeric():
+            tkinter.messagebox.showwarning("Error. Invalid data.", "Age, height and weight must be a number.")
+        elif int(age)<0 or int(age)>110:
+            tkinter.messagebox.showwarning("Error. Incorrect data.", "Age must be from 1 to 110.")
+        elif int(height)<50 or int(height)>300:
+            tkinter.messagebox.showwarning("Error. Incorrect data.","Height must be from 50 to 300cm.")
+        elif int(weight)<2 or int(weight)>600:
+            tkinter.messagebox.showwarning("Error. Incorrect data.", "Weight must be from 2 to 600kg.")
+        else:
+            bmi = calc_bmi(int(height)/100, int(weight))
+            with open('bmis.txt', 'a') as fwrite:
+                fwrite.write(f"{name} {age} {height} {weight} {bmi[0]} {bmi[1]}\n")
+            bmi_var.set(bmi[0])
+            result_var.set(bmi[1])
+    except Exception as e:
+        messagebox.showerror("Error", f"An error occurred: {str(e)}")
 
 def show_chart():
-    bmis={'Underweight':0, 'Overweight':0, 'Obese':0, 'Normal':0}
-    with open('bmis.txt', 'r') as bmisfile:
-        for line in bmisfile:
-            res=line.split()
-            if res[5]=='Normal':
-                bmis['Normal']+=1
-            elif res[5]=='Underweight':
-                bmis['Underweight']+=1
-            elif res[5]=='Overweight':
-                bmis['Overweight']+=1
-            elif res[5]=='Obese':
-                bmis['Obese']+=1
-    labels=[]
-    nums=[]
-    for lab,num in bmis.items():
-        if num!=0:
-            labels.append(lab)
-            nums.append(num)
+    try:
+        bmis={'Underweight':0, 'Overweight':0, 'Obese':0, 'Normal':0}
+        with open('bmis.txt', 'r') as bmisfile:
+            for line in bmisfile:
+                res=line.split()
+                bmis[res[5]]+=1
 
-    fig = Figure(figsize=(4, 4), dpi=100)
-    plot = fig.add_subplot(111)
-    plot.pie(nums, radius=1, labels=labels, autopct='%1.1f%%', shadow=True, rotatelabels=True)
-    canvas = FigureCanvasTkAgg(fig, chartframe)
-    canvas.get_tk_widget().grid(row=1, column=0, padx=15, pady=15)
+        labels=[]
+        nums=[]
+        for lab,num in bmis.items():
+            if num!=0:
+                labels.append(lab)
+                nums.append(num)
+
+        fig = Figure(figsize=(4, 4), dpi=100)
+        plot = fig.add_subplot(111)
+        plot.pie(nums, radius=1, labels=labels, autopct='%1.1f%%', shadow=True, rotatelabels=True)
+        canvas = FigureCanvasTkAgg(fig, chartframe)
+        canvas.get_tk_widget().grid(row=1, column=0, padx=15, pady=15)
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No BMI details found. Save some details first.")
+    except Exception as e:
+        messagebox.showerror("Error", f"An error occurred: {str(e)}")
 
 window = tkinter.Tk()
 window.title('BMI Calculator')
